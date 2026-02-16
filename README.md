@@ -10,6 +10,7 @@ A production-ready MERN stack application for creating and sharing real-time pol
 - **Frontend (Web App)**  
   https://real-time-poll-rooms-sigma.vercel.app/
 
+# First open backend then open frontend.
 ---
 
 ## Features
