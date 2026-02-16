@@ -13,7 +13,17 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: process.env.CLIENT_URL || "http://localhost:5173",
+        origin: function (origin, callback) {
+            const allowedOrigin = process.env.CLIENT_URL;
+            if (!origin ||
+                origin === allowedOrigin ||
+                origin === allowedOrigin?.replace(/\/$/, '') ||
+                origin.includes('vercel.app')) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         methods: ["GET", "POST"],
         credentials: true
     }
