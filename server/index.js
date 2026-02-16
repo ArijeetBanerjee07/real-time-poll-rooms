@@ -61,14 +61,31 @@ io.on('connection', (socket) => {
 // Make io accessible to our router
 app.set('io', io);
 
+// Health Check
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        env: {
+            hasMongo: !!process.env.MONGODB_URI,
+            hasJwt: !!process.env.JWT_SECRET,
+            clientUrl: process.env.CLIENT_URL
+        }
+    });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/polls', pollRoutes);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ message: 'Something went wrong!', error: err.message });
+    console.error('SERVER ERROR:', err.stack);
+    res.status(500).json({
+        message: 'Something went wrong on the server!',
+        error: err.message,
+        stack: process.env.NODE_ENV === 'production' ? null : err.stack
+    });
 });
 
 const PORT = process.env.PORT || 5000;
