@@ -59,18 +59,27 @@ const PollPage = () => {
         setVoting(true);
         try {
             const browserId = getBrowserId();
-            await api.post(`/polls/${pollId}/vote`, {
+            const { data } = await api.post(`/polls/${pollId}/vote`, {
                 optionId: selectedOption,
                 browserId
             });
 
+            // Update local poll state immediately with the response from server
+            if (data.poll) {
+                setPoll(data.poll);
+            }
+
             setVoted(true);
             localStorage.setItem(`voted_${pollId}`, 'true');
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to vote');
-            if (err.response?.status === 403) {
+            const message = err.response?.data?.message || 'Failed to vote';
+            alert(message);
+
+            // If already voted, still show results
+            if (err.response?.status === 403 || message.includes('already voted')) {
                 setVoted(true);
                 localStorage.setItem(`voted_${pollId}`, 'true');
+                fetchPoll(); // Refresh to get latest results
             }
         } finally {
             setVoting(false);
