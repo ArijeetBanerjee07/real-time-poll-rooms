@@ -21,7 +21,19 @@ const io = new Server(server, {
 
 // Middleware
 app.use(cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: function (origin, callback) {
+        const allowedOrigin = process.env.CLIENT_URL;
+        // Allow if no origin (like mobile apps/curl), or if it matches CLIENT_URL, 
+        // or if it's a vercel deployment from your project
+        if (!origin ||
+            origin === allowedOrigin ||
+            origin === allowedOrigin?.replace(/\/$/, '') ||
+            origin.includes('vercel.app')) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 app.use(express.json());
