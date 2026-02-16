@@ -87,7 +87,7 @@ router.post('/:pollId/vote', async (req, res) => {
         const poll = await Poll.findOneAndUpdate(
             { pollId, "options._id": optionId },
             { $inc: { "options.$.votes": 1 } },
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         if (!poll) {
